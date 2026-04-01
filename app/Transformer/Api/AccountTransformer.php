@@ -7,6 +7,7 @@ use App\Services\AccountService;
 use App\Services\PronounService;
 use App\User;
 use App\UserSetting;
+use Auth;
 use Cache;
 use League\Fractal;
 
@@ -73,6 +74,7 @@ class AccountTransformer extends Fractal\TransformerAbstract
             'last_fetched_at' => optional($profile->last_fetched_at)->toJSON(),
             'pronouns' => PronounService::get($profile->id),
             'location' => $profile->location,
+            'email_verified_at' => ($local && Auth::check() && $profile->user_id == Auth::id()) ? Auth::user()->email_verified_at : null,
         ];
 
         if ($profile->moved_to_profile_id) {
