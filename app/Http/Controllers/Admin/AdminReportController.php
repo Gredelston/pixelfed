@@ -380,7 +380,7 @@ trait AdminReportController
 
             Status::whereProfileId($pro->id)
                 ->get()
-                ->each(function ($report) {
+                ->each(function ($status) use ($meta) {
                     $status->is_nsfw = $meta->is_nsfw;
                     $status->scope = 'public';
                     $status->visibility = 'public';
