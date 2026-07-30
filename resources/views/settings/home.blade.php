@@ -197,6 +197,52 @@ $(document).ready(function() {
 				}
 		});
 
+		// iOS browsers stream native multipart form posts from disk; when the
+		// transport hiccups mid-upload (common over QUIC), CFNetwork retries
+		// the request with an unrewindable — empty — body, which fails the
+		// CSRF check and renders as "419 Page Expired". Uploading an
+		// in-memory copy via XHR gives a replayable body, and the JSON
+		// endpoint gives real error feedback instead of a silent redirect.
+		if (window.File && File.prototype.arrayBuffer) {
+			$('#avatarCollapse form').on('submit', function(e) {
+				e.preventDefault();
+				var form = $(this);
+				var file = document.getElementById('avatarInput').files[0];
+				var maxKb = {{config('pixelfed.max_avatar_size')}};
+
+				if (!file) {
+					swal('{{__('settings.error')}}', 'Select a photo first.', 'warning');
+					return;
+				}
+				if (file.type && ['image/jpeg', 'image/jpg', 'image/png'].indexOf(file.type) === -1) {
+					swal('{{__('settings.error')}}', 'Avatars must be a JPEG or PNG photo.', 'error');
+					return;
+				}
+				if (file.size > maxKb * 1024) {
+					swal('{{__('settings.error')}}', 'That photo is too large — avatars can be up to ' + filesize(maxKb * 1024, {round: 0}) + '.', 'error');
+					return;
+				}
+
+				var btn = form.find('button[type=submit]').prop('disabled', true);
+				file.arrayBuffer().then(function(buf) {
+					if (!buf.byteLength) {
+						return Promise.reject(new Error('unreadable'));
+					}
+					var fd = new FormData();
+					fd.append('upload', new Blob([buf], {type: file.type || 'image/jpeg'}), file.name || 'avatar.jpg');
+					return axios.post('/api/pixelfed/v1/avatar/update', fd);
+				}).then(function() {
+					window.location.reload();
+				}).catch(function(err) {
+					btn.prop('disabled', false);
+					var msg = (err && err.message === 'unreadable')
+						? 'Your browser could not read that photo. Re-select it from your library and try again.'
+						: '{{__('settings.home.an_error_occured_please_try_again_later')}}';
+					swal('{{__('settings.error')}}', msg, 'error');
+				});
+			});
+		}
+
 		$('.delete-profile-photo').on('click', function(e) {
 			e.preventDefault();
 			if(window.confirm('{{__('settings.home.are_you_sure_you_want_to_delete_your_profile_photo')}}') == false) {
