@@ -472,6 +472,10 @@ u                                maxlength="30"
                 }
 
                 .form-control {
+                    // Input bg must not follow --card-bg: the card is always
+                    // bg-dark, and in light color scheme --card-bg is #fff,
+                    // making the white text below invisible.
+                    background-color: #161618;
                     color: #fff;
                 }
 
