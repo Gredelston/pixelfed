@@ -459,7 +459,9 @@ Route::domain(config('pixelfed.domain.app'))->middleware(['validemail', 'twofact
     });
 
     Route::get('auth/invite/a/{code}', 'AdminInviteController@index');
-    Route::post('api/v1.1/auth/invite/admin/re', 'AdminInviteController@apiRegister')->middleware('throttle:5,1440');
+    // Shares its per-IP throttle counter with the invite check endpoints in
+    // routes/api.php; 5/day locked out multi-person households. See note there.
+    Route::post('api/v1.1/auth/invite/admin/re', 'AdminInviteController@apiRegister')->middleware('throttle:25,1440');
 
     Route::redirect('groups/', '/groups/home');
     Route::redirect('groups/home', '/groups/feed');
