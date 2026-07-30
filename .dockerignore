@@ -1,6 +1,11 @@
 # Folders
 .git/
 storage/app/public/
+# runtime data created by the container under subuids; unreadable to the
+# host user, and ./storage is bind-mounted over the image copy anyway
+storage/app/story_archives/
+storage/oauth-public.key
+storage/oauth-private.key
 mysql-9-data/
 # Laravel
 ## local storage of media excluided from image

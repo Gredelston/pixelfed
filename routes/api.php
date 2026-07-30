@@ -277,9 +277,13 @@ Route::group(['prefix' => 'api'], function () use ($middleware) {
             Route::post('iarc', 'Api\ApiV1Dot1Controller@inAppRegistrationConfirm');
             Route::get('iarer', 'Api\ApiV1Dot1Controller@inAppRegistrationEmailRedirect');
 
-            Route::post('invite/admin/verify', 'AdminInviteController@apiVerifyCheck')->middleware('throttle:20,120');
-            Route::post('invite/admin/uc', 'AdminInviteController@apiUsernameCheck')->middleware('throttle:20,120');
-            Route::post('invite/admin/ec', 'AdminInviteController@apiEmailCheck')->middleware('throttle:10,1440');
+            // Inline throttles share one per-IP counter (sha1 of domain|ip), so
+            // invitees behind a shared IP burn through these together; upstream's
+            // 20/2h + 10/day locked out household #2 with an "Invalid Invite
+            // Code" screen. Keep limits generous for this small instance.
+            Route::post('invite/admin/verify', 'AdminInviteController@apiVerifyCheck')->middleware('throttle:200,120');
+            Route::post('invite/admin/uc', 'AdminInviteController@apiUsernameCheck')->middleware('throttle:200,120');
+            Route::post('invite/admin/ec', 'AdminInviteController@apiEmailCheck')->middleware('throttle:100,1440');
         });
 
         Route::group(['prefix' => 'push'], function () use ($middleware) {
