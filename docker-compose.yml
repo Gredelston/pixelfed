@@ -1,7 +1,7 @@
 services:
 ## MariaDB and Redis (optional)
   db:
-    image: mysql:9
+    image: mariadb:10.11
     container_name: pixelfed-db
     restart: unless-stopped
     env_file:
@@ -46,7 +46,10 @@ services:
     container_name: pixelfed-app
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      # Bind loopback only — host Caddy is the sole network-facing process
+      # (Hosting Protocol). A bare "8420:8080" publishes on 0.0.0.0, which
+      # exposes Pixelfed directly on the LAN and bypasses Caddy entirely.
+      - "127.0.0.1:8420:8080"
     env_file:
       - .env
     environment:
