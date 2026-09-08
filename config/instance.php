@@ -80,6 +80,14 @@ return [
         ],
     ],
 
+    // scullery, members-only lockdown: new local profiles must be created
+    // private. The `profiles`.`is_private` column defaults to 0 and Pixelfed
+    // exposes no setting for this, so without it every newly invited member
+    // lands publicly visible until someone runs the lockdown UPDATE by hand
+    // (which is exactly what happened on 2026-09-08). Defaults to true so the
+    // safe behaviour survives a lost .env. See /srv/grapevine/README.md.
+    'force_private_new_accounts' => env('INSTANCE_FORCE_PRIVATE_NEW_ACCOUNTS', true),
+
     'enable_cc' => env('ENABLE_CONFIG_CACHE', true),
 
     'has_legal_notice' => env('INSTANCE_LEGAL_NOTICE', false),

@@ -83,6 +83,10 @@ class UserObserver
 
                 $profile->private_key = $pki_private;
                 $profile->public_key = $pki_public;
+                if ((bool) config('instance.force_private_new_accounts')) {
+                    $profile->is_private = true;
+                    $profile->indexable = false;
+                }
                 $profile->save();
                 $this->applyDefaultDomainBlocks($user);
 
